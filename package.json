@@ -1,0 +1,80 @@
+{
+  "name": "pyrrha-market",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Pyrrha PandoraBoxchain Market desktop application",
+  "main": "./.webpack/main/index.js",
+  "scripts": {
+    "clean": "npx rimraf ./.webpack && npx rimraf ./out",
+    "prestart": "npm run clean",
+    "start": "npx electron-forge start",
+    "package": "npx electron-forge package",
+    "make": "npx electron-forge make",
+    "publish": "npx electron-forge publish",
+    "lint": "npx eslint --cache --color --ext .js src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pandoraboxchain/pyrrha-market.git"
+  },
+  "keywords": [
+    "pandora",
+    "pandoraboxchain",
+    "pyrrha",
+    "pyrrha-consensus",
+    "blockchain",
+    "ethereum",
+    "web3",
+    "desktop",
+    "electron",
+    "market",
+    "dataset",
+    "kernel",
+    "ai"
+  ],
+  "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/pandoraboxchain/pyrrha-market/issues"
+  },
+  "homepage": "https://github.com/pandoraboxchain/pyrrha-market#readme",
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0-beta.49",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-devtools-installer": "^2.2.4",
+    "react": "16.4.0",
+    "react-dom": "16.4.0",
+    "react-hot-loader": "4.2.0",
+    "sequelize": "^4.37.10",
+    "sqlite3": "^4.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.49",
+    "@babel/preset-env": "^7.0.0-beta.49",
+    "@babel/preset-react": "^7.0.0-beta.49",
+    "babel-loader": "^8.0.0-beta.3",
+    "style-loader": "^0.21.0",
+    "css-loader": "^0.28.11",
+    "url-loader": "^1.0.1",
+    "svg-loader": "^0.0.2",
+    "electron": "2.0.2",
+    "@electron-forge/cli": "6.0.0-beta.16",
+    "@electron-forge/plugin-webpack": "6.0.0-beta.16",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.16",
+    "@electron-forge/maker-zip": "6.0.0-beta.16",
+    "@electron-forge/maker-deb": "6.0.0-beta.16",
+    "@electron-forge/maker-rpm": "6.0.0-beta.16",
+    "copy-webpack-plugin": "^4.5.1",
+    "eslint": "^4.19.1",
+    "babel-eslint": "^8.2.3",
+    "eslint-config-react-app": "^2.1.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.8.2",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-flowtype": "^2.47.1",
+    "rimraf": "^2.6.2"
+  },
+  "config": {
+    "forge": "./forge.config.js"
+  }
+}
