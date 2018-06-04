@@ -60,7 +60,8 @@ const createWindow = async () => {
     // }
 
     // Setup database
-    databaseWorker.loadFile(path.resolve(__dirname, 'db.html'));    
+    // databaseWorker.loadFile(path.resolve(__dirname, '../db_worker/index.html'));
+    databaseWorker.loadURL(DB_WORKER_WEBPACK_ENTRY);// eslint-disable-line
 
     // and load the app.
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line

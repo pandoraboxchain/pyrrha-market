@@ -63,39 +63,23 @@ module.exports = {
         [
             '@electron-forge/plugin-webpack', {
                 mainConfig: {
-                    entry: {
-                        index: [
-                            '@babel/polyfill',
-                            path.resolve(__dirname, 'src/main/index.js')
-                        ],
-                        db: [
-                            '@babel/polyfill',
-                            path.resolve(__dirname, 'src/workers/db/index.js')
-                        ]
-                    },
+                    entry: [
+                        '@babel/polyfill',
+                        path.resolve(__dirname, 'src/main/index.js')
+                    ],
                     module: sharedModule,
                     plugins: [
-                        new HtmlWebpackPlugin({
-                            inject: true,
-                            chunks: ['db'],
-                            filename: 'db.html',
-                            template: 'src/workers/template/index.html'
-                        }),
                         new CopyWebpackPlugin([
                             {
                                 from: path.resolve(__dirname, 'src/assets'),
                                 to: path.resolve(__dirname, '.webpack/assets')
                             }
                         ])
-                    ],
-                    output: {
-                        filename: '[name].js'
-                    },
-                    externals: ['sqlite3']
+                    ]
                 },
                 renderer: {
                     config: {
-                        module: merge.smart({
+                        module: merge({
                             rules: [
                                 {
                                     test: /\.css$/,
@@ -117,6 +101,11 @@ module.exports = {
                             html: path.resolve(__dirname, 'src/renderer/index.html'),
                             js: path.resolve(__dirname, 'src/renderer/index.js'),
                             name: 'main_window'
+                        },
+                        {
+                            html: path.resolve(__dirname, 'src/workers/template/index.html'),
+                            js: path.resolve(__dirname, 'src/workers/db/index.js'),
+                            name: 'db_worker'
                         }
                     ]
                 }

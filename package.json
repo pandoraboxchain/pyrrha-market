@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "npx rimraf ./.webpack && npx rimraf ./out",
     "prestart": "npm run clean",
+    "prepackage": "npm run clean",
     "start": "npx electron-forge start",
     "package": "npx electron-forge package",
     "make": "npx electron-forge make",
