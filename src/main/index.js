@@ -48,6 +48,13 @@ const createWindow = async () => {
         console.error(err);
     });
 
+    // Setup database
+    // databaseWorker.loadFile(path.resolve(__dirname, '../db_worker/index.html')); 
+    databaseWorker.loadURL(DB_WORKER_WEBPACK_ENTRY);// eslint-disable-line
+
+    // and load the app.
+    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
+
     // Open the DevTools.
     // if (isDevMode) {
         
@@ -55,16 +62,9 @@ const createWindow = async () => {
     //         REACT_DEVELOPER_TOOLS, 
     //         REDUX_DEVTOOLS
     //     ].map(ext => installExtension(ext)));
-        mainWindow.webContents.openDevTools();
-        databaseWorker.webContents.openDevTools();        
+    mainWindow.webContents.openDevTools();
+    databaseWorker.webContents.openDevTools();        
     // }
-
-    // Setup database
-    // databaseWorker.loadFile(path.resolve(__dirname, '../db_worker/index.html'));
-    databaseWorker.loadURL(DB_WORKER_WEBPACK_ENTRY);// eslint-disable-line
-
-    // and load the app.
-    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
 
     mainWindow.on('close', event => {
         // event.preventDefault();

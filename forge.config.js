@@ -7,8 +7,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const sharedModule = {
     rules: [
         {
-            test: /\.js?$/,
-            exclude: /(node_modules)/,
+            test: /\.js$/,
+            exclude: /node_modules/,
             use: {
                 loader: 'babel-loader',
                 options: {
@@ -92,8 +92,9 @@ module.exports = {
                             ]
                         }, sharedModule),
                         resolve: {
-                            extensions: ['.js', '.json'],
-                        }
+                            extensions: ['.js', '.json']
+                        },
+                        externals: ['aws-sdk', 'pg', 'pg-hstore', 'mysql2', 'tedious']
                     },
                     prefixedEntries: process.env.NODE_ENV === 'production' ? [] : ['react-hot-loader/patch'],
                     entryPoints: [
@@ -115,6 +116,7 @@ module.exports = {
     hooks: {},
     buildIdentifier: process.env.IS_BETA ? 'beta' : 'prod',
     packagerConfig: {
-        appBundleId: fromBuildIdentifier({ beta: 'com.beta.app', prod: 'com.app' })
+        appBundleId: fromBuildIdentifier({ beta: 'com.beta.app', prod: 'com.app' }),
+        asar: true
     }
 };
