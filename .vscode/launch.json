@@ -4,6 +4,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Build",
+            "program": "${workspaceFolder}/build.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Electron: Main",
             "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron-forge-vscode-nix",
             "runtimeArgs": [],

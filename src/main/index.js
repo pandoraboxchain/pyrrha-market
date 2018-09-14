@@ -24,33 +24,33 @@ const createWindow = async () => {
     });
 
     // Create hidden window for the Database manager
-    databaseWorker = new BrowserWindow({
-        webPreferences: {
-            nodeIntegrationInWorker: true
-        },
-        icon: path.resolve(__dirname, '../assets/icons/favicon-96x96.png')
-        // show: false
-    });
+    // databaseWorker = new BrowserWindow({
+    //     webPreferences: {
+    //         nodeIntegrationInWorker: true
+    //     },
+    //     icon: path.resolve(__dirname, '../assets/icons/favicon-96x96.png')
+    //     // show: false
+    // });
 
     // Show loaded window
     mainWindow.on('ready-to-show', () => mainWindow.show());
 
-    ipcMain.on('dbWorkerReadyForStart', () => {
-        databaseWorker.webContents.send('dbStart');
-    });
+    // ipcMain.on('dbWorkerReadyForStart', () => {
+    //     databaseWorker.webContents.send('dbStart');
+    // });
 
-    ipcMain.on('dbInitialized', evt => {
-        console.log('===== DB OK!!!!!');
-    });
+    // ipcMain.on('dbInitialized', evt => {
+    //     console.log('===== DB OK!!!!!');
+    // });
 
-    ipcMain.on('dbError', (evt, err) => {
-        console.log('===== DB ERROR!!!!!');
-        console.error(err);
-    });
+    // ipcMain.on('dbError', (evt, err) => {
+    //     console.log('===== DB ERROR!!!!!');
+    //     console.error(err);
+    // });
 
     // Setup database
     // databaseWorker.loadFile(path.resolve(__dirname, '../db_worker/index.html')); 
-    databaseWorker.loadURL(DB_WORKER_WEBPACK_ENTRY);// eslint-disable-line
+    // databaseWorker.loadURL(DB_WORKER_WEBPACK_ENTRY);// eslint-disable-line
 
     // and load the app.
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
@@ -63,7 +63,7 @@ const createWindow = async () => {
     //         REDUX_DEVTOOLS
     //     ].map(ext => installExtension(ext)));
     mainWindow.webContents.openDevTools();
-    databaseWorker.webContents.openDevTools();        
+    // databaseWorker.webContents.openDevTools();        
     // }
 
     mainWindow.on('close', event => {

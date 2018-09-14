@@ -6,13 +6,7 @@
   "description": "Pyrrha PandoraBoxchain Market desktop application",
   "main": "./.webpack/main/index.js",
   "scripts": {
-    "clean": "npx rimraf ./.webpack && npx rimraf ./out",
-    "prestart": "npm run clean",
-    "prepackage": "npm run clean",
-    "start": "npx electron-forge start",
-    "package": "npx electron-forge package",
-    "make": "npx electron-forge make",
-    "publish": "npx electron-forge publish",
+    "start": "NODE_ENV=development node ./build.js",
     "lint": "npx eslint --cache --color --ext .js src"
   },
   "repository": {
@@ -53,15 +47,8 @@
     "@babel/core": "7.0.1",
     "@babel/preset-env": "7.0.0",
     "@babel/preset-react": "7.0.0",
-    "@electron-forge/cli": "6.0.0-beta.28",
-    "@electron-forge/maker-deb": "6.0.0-beta.28",
-    "@electron-forge/maker-rpm": "6.0.0-beta.28",
-    "@electron-forge/maker-squirrel": "6.0.0-beta.28",
-    "@electron-forge/maker-zip": "6.0.0-beta.28",
-    "@electron-forge/plugin-webpack": "6.0.0-beta.28",
     "babel-eslint": "9.0.0",
     "babel-loader": "8.0.2",
-    "copy-webpack-plugin": "4.5.2",
     "css-loader": "1.0.0",
     "electron": "3.0.0-beta.12",
     "eslint": "5.5.0",
@@ -73,9 +60,16 @@
     "rimraf": "2.6.2",
     "style-loader": "0.23.0",
     "svg-loader": "0.0.2",
-    "url-loader": "1.1.1"
-  },
-  "config": {
-    "forge": "./forge.config.js"
+    "url-loader": "1.1.1",
+    "electron-builder": "20.28.4",
+    "electron-rebuild": "1.8.2",
+    "webpack": "4.18.1",
+    "webpack-dev-middleware": "3.3.0",
+    "webpack-hot-middleware": "2.24.0",
+    "webpack-merge": "4.1.4",
+    "clean-webpack-plugin": "0.1.19",
+    "copy-webpack-plugin": "4.5.2",
+    "html-webpack-plugin": "3.2.0",
+    "express": "4.16.3"
   }
 }
