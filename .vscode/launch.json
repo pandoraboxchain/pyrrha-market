@@ -4,8 +4,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Build",
-            "program": "${workspaceFolder}/build.js"
+            "name": "Launch Build Dev",
+            "program": "${workspaceFolder}/build.js",
+            "env": {
+                "NODE_ENV": "development"
+            }
         },
         {
             "type": "node",

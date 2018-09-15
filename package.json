@@ -4,9 +4,10 @@
   "private": true,
   "license": "MIT",
   "description": "Pyrrha PandoraBoxchain Market desktop application",
-  "main": "./.webpack/main/index.js",
+  "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development node ./build.js",
+    "start:prod": "NODE_ENV=production node ./build.js",
     "lint": "npx eslint --cache --color --ext .js src"
   },
   "repository": {
@@ -50,7 +51,7 @@
     "babel-eslint": "9.0.0",
     "babel-loader": "8.0.2",
     "css-loader": "1.0.0",
-    "electron": "3.0.0-beta.12",
+    "electron": "2.0.9",
     "eslint": "5.5.0",
     "eslint-config-react-app": "2.1.0",
     "eslint-plugin-flowtype": "2.50.0",

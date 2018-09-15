@@ -2,7 +2,8 @@ const webpack = require('webpack');
 const merge = require('webpack-merge');
 
 // Shared webpack config
-const { baseDir, commonModule, entries, htmls, magicConstants  } = require('./webpack.common');
+const { baseDir, entries, htmls, magicConstants, externals  } = require('./config');
+const commonModule = require('./webpack.common');
 
 module.exports = {
     devtool: 'inline-source-map',
@@ -37,5 +38,6 @@ module.exports = {
         path: baseDir,
         filename: '[name]/index.js',
         globalObject: 'self'
-    }
+    },
+    externals
 };

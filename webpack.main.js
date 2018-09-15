@@ -4,7 +4,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // Shared config
-const { baseDir, commonModule, magicConstants  } = require('./webpack.common');
+const { baseDir, magicConstants  } = require('./config');
+const commonModule = require('./webpack.common');
 
 module.exports = {
     devtool: 'source-map',
@@ -15,7 +16,7 @@ module.exports = {
         __filename: false,
     },
     entry: {
-        index: [
+        main: [
             '@babel/polyfill',
             path.resolve(__dirname, 'src/main/index.js')
         ]
@@ -31,17 +32,16 @@ module.exports = {
                 to: path.resolve(baseDir, 'assets')
             }
         ]),
+        new CopyWebpackPlugin([
+            {
+                from: path.resolve(__dirname, 'package.json'),
+                to: path.resolve(baseDir)
+            }
+        ]),
         new webpack.DefinePlugin(magicConstants),
     ],
-    resolve: {
-        modules: [
-            path.resolve(path.dirname(baseDir), './'),
-            path.resolve(path.dirname(baseDir), '..', 'node_modules'),
-            path.resolve(__dirname, '..', 'node_modules')
-        ]
-    },
     output: {
-        path: path.resolve(baseDir, 'main'),
+        path: path.resolve(baseDir),
         filename: '[name].js',
         libraryTarget: 'commonjs2'
     }
