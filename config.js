@@ -7,13 +7,13 @@ const baseDir = path.resolve(__dirname, '.webpack');
 const entryPoints = [
     {
         name: 'main_window',
-        html: path.resolve(__dirname, 'src/renderer/index.html'),
-        js: path.resolve(__dirname, 'src/renderer/index.js')
+        html: path.resolve(path.dirname(baseDir), 'src/renderer/index.html'),
+        js: path.resolve(path.dirname(baseDir), 'src/renderer/index.js')
     },
     {
         name: 'db_worker',
-        html: path.resolve(__dirname, 'src/workers/template/index.html'),
-        js: path.resolve(__dirname, 'src/workers/db/index.js'),
+        html: path.resolve(path.dirname(baseDir), 'src/workers/template/index.html'),
+        js: path.resolve(path.dirname(baseDir), 'src/workers/db/index.js'),
         noHmr: true,
         externals: ['npm', 'aws-sdk', 'mysql2', 'pg', 'pg-hstore', 'tedious']
     }

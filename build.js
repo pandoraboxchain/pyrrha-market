@@ -1,6 +1,8 @@
 const path = require('path');
 const { spawn } = require('child_process');
+const packageJson = require('./package.json');
 const electronExecPath = require(path.resolve(__dirname, 'node_modules/electron'));
+const { rebuild: electronRebuild } = require('electron-rebuild');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
@@ -14,6 +16,25 @@ const isDev = process.env.NODE_ENV === 'development';
 // Electron instance
 let lastSpawnedElectron;
 
+const rebuildNativeDependencies = async () => {
+    const electronVersion = packageJson.devDependencies.electron;
+
+    const rebuilder =  electronRebuild({
+        buildPath: path.resolve(__dirname),
+        electronVersion
+    });
+    const  { lifecycle } = rebuilder;
+
+    lifecycle.on('module-found', (module) => {
+        console.log(`Native module "${module}" has been found`);
+    });
+    lifecycle.on('module-done', () => {
+        console.log('Native module rebuild done');
+    });
+
+    await rebuilder;
+};
+
 const build = config => new Promise((resolve, reject) => {
 
     const compiler = webpack(config);
@@ -23,6 +44,7 @@ const build = config => new Promise((resolve, reject) => {
             return reject(err);
         }
 
+        console.log(`Webpack has done a build for entries: ${Object.keys(config.entry)}`);
         resolve();
     });
 });
@@ -50,7 +72,7 @@ const launchDevServers = async (config) => {
                 return reject(err);
             }
 
-            console.log(`Server running at port: ${devPort}`);
+            console.log(`Development server running at port: ${devPort}`);
             resolve(expressServer);
         });
     });
@@ -67,31 +89,17 @@ const spawnElectron = () => {
 
     const spawnOptions = {
         stdio: 'inherit',
-        env: Object.assign({}, process.env, {
-            ELECTRON_ENABLE_LOGGING: 'true',
-            ELECTRON_ENABLE_STACK_DUMPING: 'true'
-        }),
+        env: {
+            ...process.env,
+            ...{
+                ELECTRON_ENABLE_LOGGING: 'true',
+                ELECTRON_ENABLE_STACK_DUMPING: 'true'
+            }
+        },
         shell: true
     };
 
     const spawnedElectron =  spawn(electronExecPath, [path.resolve(__dirname, '.webpack')], spawnOptions);
-
-    spawnedElectron.on('error', err => {
-        console.error(`could not start electron ${err}`);
-    });
-
-    spawnedElectron.on('exit', (code, signal) => {
-        console.log(`process exited with code ${code}`);
-        process.exit(code);
-    });
-
-    spawnedElectron.on('SIGTERM', () => {
-        spawnedElectron.kill('SIGTERM');
-    });
-
-    spawnedElectron.on('SIGINT', () => {
-        spawnedElectron.kill('SIGINT');
-    });
 
     return spawnedElectron;
 };
@@ -100,10 +108,9 @@ const spawnWrapper = () => {
 
     lastSpawnedElectron = spawnElectron();
 
-    if (process.stdin.isPaused()) {
-
-        process.stdin.resume();
-    }
+    lastSpawnedElectron.on('error', err => {
+        console.error(`electron error: ${err}`);
+    });
 
     lastSpawnedElectron.on('exit', () => {
 
@@ -117,20 +124,26 @@ const spawnWrapper = () => {
             process.stdin.pause();
         }
     });
+
+    if (process.stdin.isPaused()) {
+
+        process.stdin.resume();
+    }
 };
 
 const startWebpackDev = async () => {
     
     try {
 
+        await rebuildNativeDependencies();
         await build(mainConfig);
-        await launchDevServers(rendererConfig);
+        await launchDevServers(rendererConfig);        
 
         process.stdin.on('data', async (data) => {
 
             if (data.toString().trim() === 'rs' && lastSpawnedElectron) {
 
-                console.info('\nRestarting App\n'.cyan);
+                console.info('\nRestarting App\n');
                 lastSpawnedElectron.restarted = true;
                 lastSpawnedElectron.kill('SIGTERM');
                 lastSpawnedElectron.emit('restarted', spawnWrapper());

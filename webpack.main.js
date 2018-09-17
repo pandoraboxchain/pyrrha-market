@@ -15,10 +15,16 @@ module.exports = {
         __dirname: false,
         __filename: false,
     },
+    resolve: {
+        modules: [
+            path.resolve(path.dirname(baseDir), './'),
+            path.resolve(path.dirname(baseDir), 'node_modules')
+        ],
+    },
     entry: {
         main: [
             '@babel/polyfill',
-            path.resolve(__dirname, 'src/main/index.js')
+            path.resolve(path.dirname(baseDir), 'src/main/index.js')
         ]
     },
     module: commonModule,
@@ -28,20 +34,20 @@ module.exports = {
         ]),
         new CopyWebpackPlugin([
             {
-                from: path.resolve(__dirname, 'src/assets'),
+                from: path.resolve(path.dirname(baseDir), 'src/assets'),
                 to: path.resolve(baseDir, 'assets')
             }
         ]),
         new CopyWebpackPlugin([
             {
-                from: path.resolve(__dirname, 'package.json'),
-                to: path.resolve(baseDir)
+                from: path.resolve(path.dirname(baseDir), 'package.json'),
+                to: baseDir
             }
         ]),
         new webpack.DefinePlugin(magicConstants),
     ],
     output: {
-        path: path.resolve(baseDir),
+        path: baseDir,
         filename: '[name].js',
         libraryTarget: 'commonjs2'
     }
