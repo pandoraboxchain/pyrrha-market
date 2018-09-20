@@ -13,8 +13,7 @@
         "ecmaVersion": 9,
         "ecmaFeatures": {
             "jsx": true,
-            "modules": true,
-            "experimentalObjectRestSpread": true
+            "modules": true
         }
     },
     "rules": {

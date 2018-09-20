@@ -1,0 +1,46 @@
+import Sequelize from 'sequelize';
+import db from '../db';
+
+export default db.define('jobs', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    address: {
+        type: Sequelize.STRING,
+        unique: true
+    },
+    description: {
+        type: Sequelize.STRING
+    },
+    activeWorkers: {
+        type: Sequelize.INTEGER
+    },
+    progress: {
+        type: Sequelize.INTEGER
+    },
+    kernel: {
+        type: Sequelize.STRING,
+    },
+    kernelIpfs: {
+        type: Sequelize.STRING,
+    },
+    dataset: {
+        type: Sequelize.STRING,
+    },
+    datasetIpfs: {
+        type: Sequelize.STRING,
+    },
+    ipfsResults: {
+        type: Sequelize.STRING,
+    },
+    state: {
+        type: Sequelize.INTEGER,
+    },
+    jobType: {
+        type: Sequelize.STRING
+    }    
+}, {
+    timestamps: false
+});
