@@ -6,6 +6,8 @@ import routes from './routes';
 import db from './db';
 import pandora from './pandora';
 
+let app;
+
 pandora.on('error', err => log.error('A pandora error has occured', safeObject(err)));
 pandora.on('started', () => log.info('Pandora synchronizer has been started'));
 pandora.on('stopped', () => log.info('Pandora synchronizer has been stopped'));
@@ -169,12 +171,29 @@ db.addTask({
     },
 });
 
-export default () => {
-    db.initialize(config);
+export default async () => {
+    await db.initialize(config);
 
     // Init RESTful and APIs
-    const app = express(config);
+    app = express(config);
     routes(app).catch(err => log.error('An express server error has occured', safeObject(err)));
 };
 
-//setInterval(_ => {}, 1000);
+export const stop = async () => {
+    await new Promise((resolve, reject) => {
+        app.server.close(err => {
+
+            if (err) {
+                return reject(err);
+            }
+
+            resolve();
+        });
+    });
+
+    await new Promise((resolve, reject) => {
+        pandora.stop(resolve);
+    });
+    
+    await db.stop();
+};

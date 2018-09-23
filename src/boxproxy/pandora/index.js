@@ -3,6 +3,8 @@ import { EventEmitter } from 'events';
 import { fork } from 'child_process';
 import log from '../logger';
 
+const isElectron = !!process.execPath.match(/[\\/]electron/);//local development
+
 /**
  * Pandora synchronizer
  *
@@ -26,7 +28,7 @@ export class PandoraSync extends EventEmitter {
         this.initialized = false;
         this.paused = false;
         this.options = {
-            execArgv: true ? {//process.env.NODE_ENV === 'development'
+            execArgv: isElectron ? {
                 execArgv: ['--inspect-brk=47977']
             } : undefined
         };

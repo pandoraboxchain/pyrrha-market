@@ -1,9 +1,14 @@
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
+import log, { createLogger } from './logger';
+createLogger('warn');
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, REACT_PERF } from 'electron-devtools-installer';
-import startBoxproxy from './boxproxy';
+import startBoxproxy, { stop as stopBoxproxy } from './boxproxy';
 
-startBoxproxy();
+startBoxproxy().catch(err => {
+    log.error('Boxproxy error occurred:', err);
+    app.quit();
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -32,28 +37,20 @@ const createWindow = async () => {
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
 
     // Open the DevTools.
-    // if (isDevMode) {
+    if (isDevMode) {
         
-        // await Promise.all([
-        //     REACT_DEVELOPER_TOOLS, 
-        //     REDUX_DEVTOOLS,
-        //     REACT_PERF
-        // ].map(ext => installExtension(ext)));
+        await Promise.all([
+            REACT_DEVELOPER_TOOLS, 
+            REDUX_DEVTOOLS,
+            REACT_PERF
+        ].map(ext => installExtension(ext)));
 
         mainWindow.webContents.openDevTools();    
-    // }
+    }
 
     mainWindow.on('close', event => {
-        // event.preventDefault();
-
-        // databaseWorker.on('dbStopped', () => {
-        //     databaseWorker.destroy();
-        //     databaseWorker = null;            
-        // });
-
-        // console.log('!!! Going to stop DB');
-        // setInterval(() => databaseWorker.send('helooo', 'whoooooooh!'), 1000);
-        // databaseWorker.webContents.send('stop');
+        event.preventDefault();
+        stopBoxproxy().catch(err => log.error('Boxproxy error occurred:', err));                
     });
 
     // Emitted when the window is closed.
@@ -84,6 +81,9 @@ app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
-        createWindow();
+        createWindow().catch(err => {
+            log.error('Error occurred during main window creation:', err);
+            app.quit();
+        });
     }
 });

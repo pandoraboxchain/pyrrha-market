@@ -1,6 +1,7 @@
 const path = require('path');
 const merge = require('webpack-merge');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const packageJson = require('./package.json');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -18,7 +19,7 @@ const sharedModule = {
                                 '@babel/preset-env',
                                 {
                                     targets: {
-                                        electron: '2.0.9'
+                                        electron: packageJson.devDependencies.electron
                                     }
                                 }
                             ], 
@@ -39,6 +40,7 @@ const sharedModule = {
 
 module.exports = {
     electronRebuildConfig: {
+        electronVersion: packageJson.devDependencies.electron,
         // force: true
     },
     plugins: [

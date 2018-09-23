@@ -1,8 +1,9 @@
+import path from 'path';
 import { EventEmitter } from 'events';
 import * as expect from '../utils/expect';
 import { safeObject } from '../utils/json';
 import Queue from '../utils/queue';
-import db from './db';
+import db, { dbConfigure } from './db';
 import migrator from './migrator';
 import migrations from './seeders';
 import api from './api';
@@ -150,7 +151,6 @@ export class PandoraDb extends EventEmitter {
             Object.assign(this.options , config.database || {});
 
             await Promise.all(allModels.map(model => model.sync()));
-
             await db.authenticate();
             const alreadySeeded = await api.system.isAlreadySeeded();
 

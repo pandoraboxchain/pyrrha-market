@@ -9,6 +9,7 @@ logs
 .logs
 .cache
 market.db
+log.txt
 
 .DS_Store
 
