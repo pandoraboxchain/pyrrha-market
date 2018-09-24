@@ -180,20 +180,21 @@ export default async () => {
 };
 
 export const stop = async () => {
-    await new Promise((resolve, reject) => {
-        app.server.close(err => {
+    // await new Promise((resolve, reject) => {
+    //     console.log(app.server)
+    //     app.server.close(err => {
 
-            if (err) {
-                return reject(err);
-            }
+    //         if (err) {
+    //             return reject(err);
+    //         }
 
-            resolve();
-        });
-    });
+    //         resolve();
+    //     });
+    // });
 
-    await new Promise((resolve, reject) => {
-        pandora.stop(resolve);
-    });
+    // await new Promise((resolve, reject) => {
+    //     pandora.stop(resolve);
+    // });
     
-    await db.stop();
+    // await db.stop();
 };

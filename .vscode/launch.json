@@ -5,7 +5,7 @@
             "type": "node",
             "request": "launch",
             "name": "Electron: Main",
-            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron-forge-vscode-nix",
+            "runtimeExecutable": "${workspaceFolder}/.vscode/electrondebug.sh",
             "runtimeArgs": [],
             "cwd": "${workspaceFolder}"
         },

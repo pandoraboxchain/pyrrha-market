@@ -10,7 +10,7 @@
     "prestart": "npm run clean",
     "prepackage": "npm run clean",
     "premake": "npm run clean",
-    "start": "DEBUG=webpack npx electron-forge start",
+    "start": "DEBUG=webpack npx electron-forge start --inspect-electron",
     "start:debug": "DEBUG=electron-forge:* npm start",
     "package": "NODE_ENV=production npx electron-forge package",
     "make": "NODE_ENV=production npx electron-forge make",
@@ -54,6 +54,8 @@
     "express": "4.16.3",
     "helmet": "3.13.0",
     "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0",
+    "request": "2.88.0",
+    "cross-unzip": "0.2.1",
     "async": "2.6.1",
     "websocket": "1.0.28",
     "scrypt": "6.0.3"
