@@ -68,7 +68,7 @@ const createWindow = async () => {
         }
 
         // Install Metamask extension
-        await installMetamask(session);
+        //await installMetamask(session);
 
         // and load the app.
         mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
