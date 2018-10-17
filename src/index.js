@@ -1,10 +1,10 @@
 import path from 'path';
-import { app, BrowserWindow, session } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import log, { createLogger } from './logger';
-createLogger('warn');
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, REACT_PERF } from 'electron-devtools-installer';
 import startBoxproxy, { stop as stopBoxproxy } from './boxproxy';
-import installMetamask from './metamask';
+
+createLogger('warn');
 
 startBoxproxy().catch(err => {
     log.error('Boxproxy error occurred:', err);
