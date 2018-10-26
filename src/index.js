@@ -4,7 +4,9 @@ import log, { createLogger } from './logger';
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, REACT_PERF } from 'electron-devtools-installer';
 import startBoxproxy, { stop as stopBoxproxy } from './boxproxy';
 
-createLogger('warn');
+const isDevMode = !!process.execPath.match(/[\\/]electron/);
+
+createLogger(isDevMode ? 'silly' : 'warn');
 
 startBoxproxy().catch(err => {
     log.error('Boxproxy error occurred:', err);
@@ -17,8 +19,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 let mainWindow;
-
-const isDevMode = !!process.execPath.match(/[\\/]electron/);
 
 const createWindow = async () => {
 

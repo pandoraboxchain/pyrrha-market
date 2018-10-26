@@ -6,8 +6,8 @@
  */
 export const getKernelsRecords = async (pjs) => {
     
-    const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.kernels.fetchAll();
+    const blockNumber = await pjs.api.web3.eth.getBlockNumber();
+    const { records, error } = await pjs.kernels.fetchAll();
 
     return {
         records,
@@ -27,13 +27,13 @@ export const getKernelsRecords = async (pjs) => {
  */
 export const subscribeKernelAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const kernelAdded = await pjs.api.kernels.eventKernelAdded(options);
+    const kernelAdded = await pjs.kernels.eventKernelAdded(options);
     return kernelAdded
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,
@@ -58,13 +58,13 @@ export const subscribeKernelAdded = async (pjs, options = {}, dataCallback = () 
  */
 export const subscribeKernelRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const kernelRemoved = await pjs.api.kernels.eventKernelRemoved(options)
+    const kernelRemoved = await pjs.kernels.eventKernelRemoved(options)
     return kernelRemoved
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,

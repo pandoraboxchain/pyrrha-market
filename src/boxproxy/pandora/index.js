@@ -294,30 +294,30 @@ export class PandoraSync extends EventEmitter {
 
             this.worker.send({
                 cmd: 'start'
-            });            
-        } else {
-
-            Object.assign(this.options , options);
-
-            const workerOptions = {
-                stdio: ['ipc']
-            };
-
-            this.worker = fork(this.options.workerPath || path.resolve(__dirname, 'worker.js'),
-                this.options.execArgv, 
-                workerOptions);
-
-            this.worker.on('error', err => this.emit('error', err));
-            this.worker.on('exit', () => {
-                this.started = false;
-                this.emit('stopped');
             });
-            this.worker.on('message', message => this._messageManager(message));
+            return;
+        } 
+        
+        Object.assign(this.options , options);
 
-            this.worker.send({
-                cmd: 'start'
-            });
-        }
+        const workerOptions = {
+            stdio: ['ipc']
+        };
+
+        this.worker = fork(this.options.workerPath || path.resolve(__dirname, 'worker.js'),
+            this.options.execArgv, 
+            workerOptions);
+
+        this.worker.on('error', err => this.emit('error', err));
+        this.worker.on('exit', () => {
+            this.started = false;
+            this.emit('stopped');
+        });
+        this.worker.on('message', message => this._messageManager(message));
+
+        this.worker.send({
+            cmd: 'start'
+        });
     }
 
     /**

@@ -17,7 +17,7 @@ pandora.on('connected', evt => log.warn('Pandora synchronizer has been connected
 db.on('error', err => log.error('A database error has occured', safeObject(err)));
 db.once('initialized', () => {
     log.info('Database initialized');
-    pandora.start(config);
+    pandora.start(config).catch(err => log.error('A Pandora error has occured', safeObject(err)));
 });
 db.once('stopped', () => log.info('Database stopped'));
 db.on('beforeAction', task => log.debug(`Database manager going to start an action for task "${task.name}"`, task.data));

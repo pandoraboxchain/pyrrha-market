@@ -11,11 +11,10 @@
         },
         {
             "name": "Electron: Renderer",
-            "type": "chrome",
+            "type": "node",
             "request": "attach",
-            "port": 9229,
-            "webRoot": "${workspaceFolder}",
-            "timeout": 15000
+            "port": 47977,
+            "timeout": 30000
         }
     ],
     "compounds": [

@@ -6,8 +6,8 @@
  */
 export const getWorkersRecords = async (pjs) => {
     
-    const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.workers.fetchAll();
+    const blockNumber = await pjs.api.web3.eth.getBlockNumber();
+    const { records, error } = await pjs.workers.fetchAll();
 
     return {
         records,
@@ -27,13 +27,13 @@ export const getWorkersRecords = async (pjs) => {
  */
 export const subscribeWorkerAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const workerNodeCreated = await pjs.api.workers.eventWorkerNodeCreated(options);
+    const workerNodeCreated = await pjs.workers.eventWorkerNodeCreated(options);
     return workerNodeCreated
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,
@@ -59,13 +59,13 @@ export const subscribeWorkerAdded = async (pjs, options = {}, dataCallback = () 
  */
 export const subscribeWorkerNodeStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const workerNodeStateChanged = await pjs.api.workers.eventWorkerNodeStateChanged(address, options);
+    const workerNodeStateChanged = await pjs.workers.eventWorkerNodeStateChanged(address, options);
     return workerNodeStateChanged
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,

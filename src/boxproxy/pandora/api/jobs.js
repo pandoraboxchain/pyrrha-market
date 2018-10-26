@@ -6,8 +6,8 @@
  */
 export const getJobsRecords = async (pjs) => {
     
-    const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.jobs.fetchAll();
+    const blockNumber = await pjs.api.web3.eth.getBlockNumber();
+    const { records, error } = await pjs.jobs.fetchAll();
 
     return {
         records,
@@ -27,13 +27,13 @@ export const getJobsRecords = async (pjs) => {
  */
 export const subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const cognitiveJobCreated = await pjs.api.jobs.eventCognitiveJobCreated(options);
+    const cognitiveJobCreated = await pjs.jobs.eventCognitiveJobCreated(options);
     return cognitiveJobCreated
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,
@@ -58,13 +58,13 @@ export const subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallba
  */
 export const subscribeJobStateChanged = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const jobStateChanged = await pjs.api.jobs.eventJobStateChanged(options);
+    const jobStateChanged = await pjs.jobs.eventJobStateChanged(options);
     return jobStateChanged
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,

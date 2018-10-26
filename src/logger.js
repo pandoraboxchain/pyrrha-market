@@ -1,7 +1,7 @@
-import path from 'path';
-import fs from 'fs';
+// import path from 'path';
+// import fs from 'fs';
 import logger from 'electron-log';
-import pack from '../package.json'
+import pack from '../package.json';
 
 export const createLogger = level => {
 

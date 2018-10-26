@@ -7,11 +7,25 @@ import * as kernelsApi from './api/kernels';
 import * as datasetsApi from './api/datasets';
 import * as jobsApi from './api/jobs';
 import * as workersApi from './api/workers';
-import pjs, {
-    PJS_STOPPED,
-    PJS_CONNECTING,
-    PJS_CONNECTED
-} from './pjsConnector';
+import Pjs from 'pyrrha-js';
+import PjsWsConnector, {
+    CONNECTING, 
+    CONNECTED, 
+    DISCONNECTED,
+    STOPPED,
+} from 'pyrrha-js/dist/connector';
+
+const pjsConnector = new PjsWsConnector(Pjs, {
+    config: {
+        protocol: config.protocol,
+        host: config.nodeHost,
+        port: config.nodePort,
+        wstimeout: config.wstimeout,
+        provider: undefined,
+        contracts: config.contracts,
+        addresses: config.addresses
+    }
+});
 
 // Process will alive while processGuard equal true
 let processGuard = true;
@@ -38,11 +52,6 @@ const PAN_WORKERS_SUBSCRIBED = 'PAN_WORKERS_SUBSCRIBED';
 
 // Worker state model
 const stateModel = {
-    pjs: {
-        [PJS_STOPPED]: [PJS_CONNECTING],
-        [PJS_CONNECTING]: [PJS_CONNECTED, PJS_STOPPED],
-        [PJS_CONNECTED]: [PJS_CONNECTING, PJS_STOPPED]
-    },
     pan: {
         [PAN_STOPPED]: [PAN_STARTED],
         [PAN_STARTED]: [PAN_STOPPED]
@@ -68,24 +77,19 @@ const stateModel = {
 // Worker states conditions
 const stateConditions = {
     [PAN_KERNELS_BASELINE]: {
-        pan: [PAN_STARTED],
-        pjs: [PJS_CONNECTED]
+        pan: [PAN_STARTED]
     },
     [PAN_KERNELS_SUBSCRIBED]: {
-        pan: [PAN_STARTED],
-        pjs: [PJS_CONNECTED]
+        pan: [PAN_STARTED]
     },
     [PAN_DATASETS_SUBSCRIBED]: {
-        pan: [PAN_STARTED],
-        pjs: [PJS_CONNECTED]
+        pan: [PAN_STARTED]
     },
     [PAN_JOBS_SUBSCRIBED]: {
-        pan: [PAN_STARTED],
-        pjs: [PJS_CONNECTED]
+        pan: [PAN_STARTED]
     },
     [PAN_WORKERS_SUBSCRIBED]: {
-        pan: [PAN_STARTED],
-        pjs: [PJS_CONNECTED]
+        pan: [PAN_STARTED]
     }
 };
 
@@ -94,7 +98,6 @@ const state = new StateManager({
     model: stateModel,
     conditions: stateConditions,
     state: {
-        pjs: PJS_STOPPED,
         pan: PAN_STOPPED,
         kernels: PAN_KERNELS_BASELINE,
         datasets: PAN_DATASETS_BASELINE,
@@ -124,9 +127,7 @@ const sendError = (err, ...extra) => {
 // Helper for messages sendig
 const sendMessage = message => {
 
-    const currentState = state.get('pjs');
-
-    if (currentState !== PJS_STOPPED) {
+    if (pjsConnector.readyState !== STOPPED) {
 
         process.send(message);
 
@@ -150,17 +151,16 @@ subscriptions.subscriptions.on('error', sendError);
 const messageManager = async (message) => {
     log.debug('WORKER: a message received from the PandoraSync', message);
 
-    const connectionState = state.get('pjs');
+    if (pjsConnector.readyState === CONNECTING) {
 
-    if (connectionState === PJS_CONNECTING) {
-
-        log.warn(`WORKER: message was delayed due to connection status "${connectionState}"`);
-        return pjs.once('connected', () => messageManager(message));
+        log.warn(`WORKER: message was delayed due to connection status "${pjsConnector.readyState}"`);
+        return pjsConnector.once('connected', () => messageManager(message));
     }
 
-    if (connectionState === PJS_STOPPED && message.cmd !== 'start') {
+    if ((pjsConnector.readyState === STOPPED || pjsConnector.readyState === DISCONNECTED) && 
+        message.cmd !== 'start') {
         
-        log.warn(`WORKER: message was ignored due to connection status "${connectionState}"`);
+        log.warn(`WORKER: message was ignored due to connection status "${pjsConnector.readyState}"`);
         return sendError(new Error('Not connected. Message ignored'), message);
     }
 
@@ -181,6 +181,7 @@ const messageManager = async (message) => {
             
             // Stop the worker
             case 'stop':
+                await pjsConnector.close();
                 await state.set({
                     pan: PAN_STOPPED
                 });
@@ -191,21 +192,19 @@ const messageManager = async (message) => {
             
             // Start the worker
             case 'start':
-                
-                if (state.get('pjs') === PJS_STOPPED) {
 
-                    await pjs.connect({
-                        state,
-                        config: {
-                            protocol: config.protocol,
-                            host: config.nodeHost,
-                            port: config.nodePort,
-                            wstimeout: config.wstimeout,
-                            contracts: config.contracts,
-                            addresses: config.addresses,
-                            provider: config.provider // Pre-defined provider, usually defined in testing environment 
-                        }
+                if (pjsConnector.readyState === CONNECTED) {
+
+                    sendMessage({
+                        cmd: 'started',
+                        date: Date.now()
                     });
+                    break;
+                }
+                
+                if (pjsConnector.readyState === STOPPED || pjsConnector.readyState === DISCONNECTED) {
+
+                    await pjsConnector.connect();
                 } 
                 
                 await state.set({
@@ -223,7 +222,7 @@ const messageManager = async (message) => {
 
                 log.debug('WORKER: going to run "getKernelsRecords"');
                 
-                const kernelsRecordsResult = await kernelsApi.getKernelsRecords(pjs);
+                const kernelsRecordsResult = await kernelsApi.getKernelsRecords(pjsConnector.pjs);
 
                 await state.set({
                     kernels: PAN_KERNELS_BASELINE
@@ -257,7 +256,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
                         
-                        const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
+                        const kernelAdded = await kernelsApi.subscribeKernelAdded(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just added "kernelsRecords" received from event "subscribeKernelAdded"', result);
@@ -289,7 +288,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
         
-                        const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
+                        const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just removed kernels received from event "subscribeKernelRemoved"', result);
@@ -322,7 +321,7 @@ const messageManager = async (message) => {
 
                 log.debug('WORKER: going to run "getDatasetsRecords"');
                 
-                const datasetsRecordsResult = await datasetsApi.getDatasetsRecords(pjs);
+                const datasetsRecordsResult = await datasetsApi.getDatasetsRecords(pjsConnector.pjs);
 
                 await state.set({
                     datasets: PAN_DATASETS_BASELINE
@@ -356,7 +355,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
                         
-                        const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
+                        const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just added "datasetsRecords" received from event "subscribeDatasetAdded"', result);
@@ -388,7 +387,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
         
-                        const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
+                        const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just removed datasets received from event "subscribeDatasetRemoved"', result);
@@ -421,7 +420,7 @@ const messageManager = async (message) => {
 
                 log.debug('WORKER: going to run "getJobsRecords"');
                 
-                const jobsRecordsResult = await jobsApi.getJobsRecords(pjs);
+                const jobsRecordsResult = await jobsApi.getJobsRecords(pjsConnector.pjs);
 
                 await state.set({
                     jobs: PAN_JOBS_BASELINE
@@ -450,7 +449,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
                         
-                        const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
+                        const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just added "jobsRecords" received from event "subscribeCognitiveJobCreated"', result);
@@ -488,7 +487,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
         
-                        const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
+                        const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
                             log.debug('WORKER: going to send just changed "jobsRecords" received from event "subscribeJobStateChanged"', result);
@@ -516,7 +515,7 @@ const messageManager = async (message) => {
 
                 log.debug('WORKER: going to run "getWorkersRecords"');
                 
-                const workersRecordsResult = await workersApi.getWorkersRecords(pjs);
+                const workersRecordsResult = await workersApi.getWorkersRecords(pjsConnector.pjs);
 
                 await state.set({
                     workers: PAN_WORKERS_BASELINE
@@ -545,7 +544,7 @@ const messageManager = async (message) => {
                             fromBlock: message.blockNumber
                         });
                         
-                        const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
+                        const workerAdded = await workersApi.subscribeWorkerAdded(pjsConnector.pjs, {
                             fromBlock: message.blockNumber
                         }, result => {
         
@@ -583,7 +582,7 @@ const messageManager = async (message) => {
                         fromBlock: message.blockNumber
                     });
 
-                    const workerChanged = await workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
+                    const workerChanged = await workersApi.subscribeWorkerNodeStateChanged(pjsConnector.pjs, message.address, {
                         fromBlock: message.blockNumber
                     }, result => {
                         log.debug('WORKER: going to send just changed "workersRecords" received from event "subscribeWorkerNodeStateChanged"', result);
@@ -638,15 +637,15 @@ const messageManager = async (message) => {
 };
 
 // Listen for errors
-pjs.on('error', sendError);
+pjsConnector.on('error', sendError);
 
-pjs.on('disconnected', data => sendMessage({
+pjsConnector.on('timeout', data => sendMessage({
     cmd: 'disconnected',
     date: data.date
 }));
 
 // Re-subscribe all active subscriptions on reconnect
-pjs.on('connected', async (data) => {
+pjsConnector.on('connected', async (data) => {
 
     try {
 
@@ -663,7 +662,7 @@ pjs.on('connected', async (data) => {
 });
 
 // Emit last block event
-pjs.on('lastBlockNumber', blockNumber => sendMessage({
+pjsConnector.on('lastBlockNumber', blockNumber => sendMessage({
     cmd: 'lastBlockNumber',
     blockNumber,
     date: Date.now()
