@@ -182,6 +182,7 @@ const messageManager = async (message) => {
             // Stop the worker
             case 'stop':
                 await pjsConnector.close();
+                console.log('>>>>>>!!!>>>>>>>')
                 await state.set({
                     pan: PAN_STOPPED
                 });
@@ -639,9 +640,9 @@ const messageManager = async (message) => {
 // Listen for errors
 pjsConnector.on('error', sendError);
 
-pjsConnector.on('timeout', data => sendMessage({
+pjsConnector.on('timeout', () => sendMessage({
     cmd: 'disconnected',
-    date: data.date
+    date: Date.now()
 }));
 
 // Re-subscribe all active subscriptions on reconnect
@@ -676,6 +677,7 @@ setInterval(_ => {
 
     if (!processGuard) {
 
+        log.debug('WORKER going to be stopped');
         sendMessage({
             cmd: 'stopped',
             date: Date.now()

@@ -28,7 +28,7 @@ export class PandoraSync extends EventEmitter {
         this.initialized = false;
         this.paused = false;
         this.options = {
-            execArgv: isElectron ? {
+            execArgv: isElectron && process.env.DEBUG && process.env.DEBUG.includes('worker') ? {
                 execArgv: ['--inspect-brk=47977']
             } : undefined
         };

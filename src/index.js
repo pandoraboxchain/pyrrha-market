@@ -1,24 +1,34 @@
 import path from 'path';
-import { app, BrowserWindow } from 'electron';
+import { app, ipcMain, BrowserWindow, Tray, Menu } from 'electron';
+import pack from '../package.json';
 import log, { createLogger } from './logger';
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, REACT_PERF } from 'electron-devtools-installer';
 import startBoxproxy, { stop as stopBoxproxy } from './boxproxy';
+
+// Main Browser window
+let mainWindow;
+let mainTray = null;
+
+// Database API referense
+let boxproxyDbApi;
 
 const isDevMode = !!process.execPath.match(/[\\/]electron/);
 
 createLogger(isDevMode ? 'silly' : 'warn');
 
-startBoxproxy().catch(err => {
-    log.error('Boxproxy error occurred:', err);
-    app.quit();
-});
+startBoxproxy()
+    .then(boxproxy => {
+        boxproxyDbApi = boxproxy.api;
+    })
+    .catch(err => {
+        log.error('Boxproxy error occurred:', err);
+        app.quit();
+    });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
     app.quit();
 }
-
-let mainWindow;
 
 const createWindow = async () => {
 
@@ -45,7 +55,7 @@ const createWindow = async () => {
         });
 
         mainWindow.on('close', event => {
-            stopBoxproxy().catch(err => log.error('Boxproxy error occurred:', err));                
+            
         });
 
         // Emitted when the window is closed.
@@ -54,7 +64,15 @@ const createWindow = async () => {
             // in an array if your app supports multi windows, this is the time
             // when you should delete the corresponding element.
 
-            mainWindow = null;
+            stopBoxproxy()
+                .then(() => {
+                    log.debug('Boxproxy has been closed');
+                    mainWindow = null;
+                })
+                .catch(err => {
+                    log.error('Boxproxy error occurred:', err);
+                    mainWindow = null;
+                });            
         });
 
         // Install the DevTools
@@ -67,11 +85,19 @@ const createWindow = async () => {
             ].map(ext => installExtension(ext)));
         }
 
-        // Install Metamask extension
-        //await installMetamask(session);
-
         // and load the app.
         mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);// eslint-disable-line
+        
+        // System Tray
+        mainTray = new Tray(path.resolve(__dirname, '../assets/icons/favicon-96x96.png'));
+        mainTray.setTitle(pack.name);
+        const mainTrayMenu = Menu.buildFromTemplate([
+            {
+                label: 'Quit',
+                click: () => app.quit()
+            }
+        ]);
+        mainTray.setContextMenu(mainTrayMenu);
         
     } catch (err) {
 
@@ -106,3 +132,5 @@ app.on('activate', () => {
         });
     }
 });
+
+// ipcMain.on('cmd', (event, data) => console.log('!!!', data));

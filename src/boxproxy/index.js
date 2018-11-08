@@ -1,8 +1,8 @@
 import { safeObject } from './utils/json';
 import log from './logger';
 import config from '../config';
-import express from './express';
-import routes from './routes';
+// import express from './express';
+// import routes from './routes';
 import db from './db';
 import pandora from './pandora';
 
@@ -175,8 +175,12 @@ export default async () => {
     await db.initialize(config);
 
     // Init RESTful and APIs
-    app = express(config);
-    routes(app).catch(err => log.error('An express server error has occured', safeObject(err)));
+    // app = express(config);
+    // await routes(app);
+
+    return {
+        api: db.api
+    };
 };
 
 export const stop = async () => {
@@ -192,9 +196,13 @@ export const stop = async () => {
     //     });
     // });
 
-    // await new Promise((resolve, reject) => {
-    //     pandora.stop(resolve);
-    // });
+    await new Promise((resolve, reject) => {
+        pandora.stop(resolve);        
+    });
+
+    log.debug('PandoraSync has been stopped');
     
-    // await db.stop();
+    await db.stop();
+
+    log.debug('Database has been stopped');
 };
